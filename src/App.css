@@ -50,6 +50,13 @@ main {
   text-align: center;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.callout-box:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
 }
 
 .callout-box h3 {
@@ -77,12 +84,27 @@ main {
     margin-bottom: 10px;
 }
 
+.pie-chart-item {
+    transition: all 0.3s ease;
+}
+
+.pie-chart-item:hover {
+    transform: translateY(-2px);
+}
+
 .chart-container, .table-container {
   margin-bottom: 40px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   border-radius: 8px;
   background: #ffffff; /* Use a slightly different white for cards */
+  transition: all 0.3s ease;
+}
+
+.chart-container:hover, .table-container:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
 }
 
 h2 {
