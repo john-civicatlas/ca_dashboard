@@ -122,7 +122,7 @@ function Dashboard() {
                         <h3>{chart.title}</h3>
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
-                                <Pie data={chart.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
+                                <Pie data={chart.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
                                     {chart.data.map((entry, i) => <Cell key={`cell-${i}`} fill={entry.name === 'No' ? '#C4C4C4' : COLORS[0]} />)}
                                 </Pie>
                                 <Tooltip />
@@ -152,7 +152,7 @@ function Dashboard() {
                 <h2>Case Quality Distribution</h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
-                    <Pie data={pieData.quality} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
+                    <Pie data={pieData.quality} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
                         {pieData.quality.map((entry, index) => <Cell key={`cell-${index}`} fill={qualityColorMapping[entry.name]} />)}
                     </Pie>
                     <Tooltip />
