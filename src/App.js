@@ -16,19 +16,27 @@ L.Icon.Default.mergeOptions({
 
 const COLORS = ['#FF5950', '#0F2490', '#FF7C66', '#3549B3', '#424242', '#181818'];
 const qualityColorMapping = {
-    'Very Good': '#557C55', // Muted Green
-    'Good': '#829E82',      // Lighter Muted Green
-    'Normal': '#E3B448',    // Muted Yellow/Ochre
-    'Poor': '#C85C5C'       // Muted Red
+    'Very Good': '#10B981', // Vibrant Green
+    'Good': '#3B82F6',      // Vibrant Blue
+    'Normal': '#F59E0B',    // Vibrant Orange
+    'Poor': '#EF4444'       // Vibrant Red
 };
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.55;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
     return (
-        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+        <text 
+            x={x} 
+            y={y} 
+            fill="white" 
+            textAnchor="middle" 
+            dominantBaseline="central"
+            fontSize="14"
+            fontWeight="600"
+        >
             {`${(percent * 100).toFixed(0)}%`}
         </text>
     );
