@@ -261,7 +261,7 @@ function Dashboard() {
                         <h3>{chart.title}</h3>
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
-                                <Pie data={chart.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={200} innerRadius={50} fill="#8884d8" labelLine={false}>
+                                <Pie data={chart.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} fill="#8884d8" labelLine={false}>
                                     {chart.data.map((entry, i) => <Cell key={`cell-${i}`} fill={entry.name === 'No' ? '#C4C4C4' : COLORS[0]} />)}
                                 </Pie>
                                 <Tooltip />
