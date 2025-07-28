@@ -152,7 +152,7 @@ function Dashboard() {
                 <h2>Case Quality Distribution</h2>
                 <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
-                    <Pie data={pieData.quality} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
+                    <Pie data={pieData.quality} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
                         {pieData.quality.map((entry, index) => <Cell key={`cell-${index}`} fill={qualityColorMapping[entry.name]} />)}
                     </Pie>
                     <Tooltip />
