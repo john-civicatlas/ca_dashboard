@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
@@ -45,10 +45,72 @@ const renderCompletenessLabel = ({ data }) => {
     );
 };
 
+const geoJsonStyle = (feature) => {
+    return {
+        fillColor: '#FF5950',
+        weight: 3,
+        opacity: 1,
+        color: '#0F2490',
+        fillOpacity: 0.5
+    };
+};
+
+const onEachFeature = (feature, layer) => {
+    if (feature.properties && feature.properties.CITY_NM) {
+        layer.bindPopup(`<b>${feature.properties.CITY_NM}</b><br/>Population 2022: ${feature.properties.POP2022 || 'N/A'}`);
+    }
+};
+
+const calculateBounds = (features) => {
+    if (!features || features.length === 0) return null;
+    
+    let minLat = Infinity, maxLat = -Infinity;
+    let minLng = Infinity, maxLng = -Infinity;
+    
+    features.forEach(feature => {
+        if (feature.geometry && feature.geometry.coordinates) {
+            feature.geometry.coordinates.forEach(ring => {
+                ring.forEach(coord => {
+                    const [lng, lat] = coord;
+                    minLat = Math.min(minLat, lat);
+                    maxLat = Math.max(maxLat, lat);
+                    minLng = Math.min(minLng, lng);
+                    maxLng = Math.max(maxLng, lng);
+                });
+            });
+        }
+    });
+    
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+    const latDiff = maxLat - minLat;
+    const lngDiff = maxLng - minLng;
+    
+    // Calculate appropriate zoom level
+    const maxDiff = Math.max(latDiff, lngDiff);
+    let zoom = 8; // Default zoom
+    
+    if (maxDiff > 3) zoom = 6;
+    else if (maxDiff > 2) zoom = 7;
+    else if (maxDiff > 1) zoom = 8;
+    else if (maxDiff > 0.5) zoom = 9;
+    else if (maxDiff > 0.2) zoom = 10;
+    else if (maxDiff > 0.1) zoom = 11;
+    else if (maxDiff > 0.05) zoom = 12;
+    else zoom = 13;
+    
+    return {
+        center: [centerLat, centerLng],
+        zoom: zoom
+    };
+};
+
 function Dashboard() {
   const [tableData, setTableData] = useState([]);
   const [pieData, setPieData] = useState(null);
   const [topNumbersData, setTopNumbersData] = useState(null);
+  const [geoJsonData, setGeoJsonData] = useState(null);
+  const [mapView, setMapView] = useState({ center: [32.7767, -96.7970], zoom: 7 });
 
   useEffect(() => {
     Papa.parse('/sample_data.csv', {
@@ -110,6 +172,33 @@ function Dashboard() {
             }
         },
       });
+
+    // Fetch GeoJSON data
+    fetch('/coverage_areas.geojson')
+      .then(response => response.json())
+      .then(data => {
+        console.log('GeoJSON data loaded:', data);
+        // Filter to only show cities with last_edited value
+        const filteredData = {
+          ...data,
+          features: data.features.filter(feature => 
+            feature.properties && feature.properties.last_edited
+          )
+        };
+        console.log('Filtered GeoJSON data:', filteredData);
+        
+        // Calculate bounds for the filtered features
+        const mapView = calculateBounds(filteredData.features);
+        console.log('Calculated map view:', mapView);
+        console.log('Filtered features count:', filteredData.features.length);
+        if (mapView) {
+            setMapView(mapView);
+        }
+        setGeoJsonData(filteredData);
+      })
+      .catch(error => {
+        console.error('Error fetching GeoJSON:', error);
+      });
   }, []);
 
   return (
@@ -137,31 +226,29 @@ function Dashboard() {
         )}
         <div className="chart-container">
           <h2>Coverage Area</h2>
-          <div style={{ height: '400px', width: '100%' }}>
+          <div style={{ height: '600px', width: '100%' }}>
             <MapContainer 
-              center={[32.7767, -96.7970]} 
-              zoom={10} 
+              center={mapView.center} 
+              zoom={mapView.zoom} 
               style={{ height: '100%', width: '100%' }}
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
-              <Marker position={[32.7767, -96.7970]}>
-                <Popup>
-                  Dallas, TX - Coverage Area
-                </Popup>
-              </Marker>
-              <Marker position={[32.7555, -97.3308]}>
-                <Popup>
-                  Fort Worth, TX - Coverage Area
-                </Popup>
-              </Marker>
-              <Marker position={[33.2148, -97.1331]}>
-                <Popup>
-                  Denton, TX - Coverage Area
-                </Popup>
-              </Marker>
+              {geoJsonData && (
+                <GeoJSON 
+                  key="coverage-areas"
+                  data={geoJsonData} 
+                  style={geoJsonStyle}
+                  onEachFeature={onEachFeature}
+                />
+              )}
+              {!geoJsonData && (
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: 'white', padding: '10px', border: '1px solid #ccc' }}>
+                  Loading coverage areas...
+                </div>
+              )}
             </MapContainer>
           </div>
         </div>
