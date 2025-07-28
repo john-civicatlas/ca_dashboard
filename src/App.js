@@ -88,16 +88,16 @@ const calculateBounds = (features) => {
     
     // Calculate appropriate zoom level
     const maxDiff = Math.max(latDiff, lngDiff);
-    let zoom = 8; // Default zoom
+    let zoom = 9; // Default zoom
     
-    if (maxDiff > 3) zoom = 6;
-    else if (maxDiff > 2) zoom = 7;
-    else if (maxDiff > 1) zoom = 8;
-    else if (maxDiff > 0.5) zoom = 9;
-    else if (maxDiff > 0.2) zoom = 10;
-    else if (maxDiff > 0.1) zoom = 11;
-    else if (maxDiff > 0.05) zoom = 12;
-    else zoom = 13;
+    if (maxDiff > 3) zoom = 7;
+    else if (maxDiff > 2) zoom = 8;
+    else if (maxDiff > 1) zoom = 9;
+    else if (maxDiff > 0.5) zoom = 10;
+    else if (maxDiff > 0.2) zoom = 11;
+    else if (maxDiff > 0.1) zoom = 12;
+    else if (maxDiff > 0.05) zoom = 13;
+    else zoom = 14;
     
     return {
         center: [centerLat, centerLng],
@@ -110,7 +110,7 @@ function Dashboard() {
   const [pieData, setPieData] = useState(null);
   const [topNumbersData, setTopNumbersData] = useState(null);
   const [geoJsonData, setGeoJsonData] = useState(null);
-  const [mapView, setMapView] = useState({ center: [32.7767, -96.7970], zoom: 7 });
+  const [mapView, setMapView] = useState({ center: [32.9750, -96.7970], zoom: 9 });
 
   useEffect(() => {
     Papa.parse('/sample_data.csv', {
