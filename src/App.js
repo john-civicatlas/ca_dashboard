@@ -10,18 +10,6 @@ const qualityColorMapping = {
     'Normal': '#E3B448',    // Muted Yellow/Ochre
     'Poor': '#C85C5C'       // Muted Red
 };
-const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-            {`${(percent * 100).toFixed(0)}%`}
-        </text>
-    );
-};
 
 function Dashboard() {
   const [tableData, setTableData] = useState([]);
@@ -120,15 +108,37 @@ function Dashboard() {
                 {pieData.completenessCharts.map((chart, index) => (
                     <div className="chart-container pie-chart-item" key={index}>
                         <h3>{chart.title}</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie data={chart.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
-                                    {chart.data.map((entry, i) => <Cell key={`cell-${i}`} fill={entry.name === 'No' ? '#C4C4C4' : COLORS[0]} />)}
-                                </Pie>
-                                <Tooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <div className="donut-chart-wrapper">
+                            <ResponsiveContainer width="100%" height={250}>
+                                <PieChart>
+                                    <Pie 
+                                        data={chart.data} 
+                                        dataKey="value" 
+                                        nameKey="name" 
+                                        cx="50%" 
+                                        cy="50%" 
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        label={false}
+                                        labelLine={false}
+                                    >
+                                        {chart.data.map((entry, i) => (
+                                            <Cell 
+                                                key={`cell-${i}`} 
+                                                fill={entry.name === 'Yes' ? COLORS[0] : '#C4C4C4'}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            {chart.data[0]?.name === 'Yes' && (
+                                <div className="donut-center-label">
+                                    <span className="donut-percentage">{chart.data[0].value.toFixed(0)}%</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -150,15 +160,35 @@ function Dashboard() {
         {pieData && (
             <div className="chart-container">
                 <h2>Case Quality Distribution</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                    <Pie data={pieData.quality} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
-                        {pieData.quality.map((entry, index) => <Cell key={`cell-${index}`} fill={qualityColorMapping[entry.name]} />)}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                    </PieChart>
-                </ResponsiveContainer>
+                <div className="donut-chart-wrapper">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                            <Pie 
+                                data={pieData.quality} 
+                                dataKey="value" 
+                                nameKey="name" 
+                                cx="50%" 
+                                cy="50%" 
+                                innerRadius={70}
+                                outerRadius={100} 
+                                fill="#8884d8" 
+                                label={false}
+                                labelLine={false}
+                            >
+                                {pieData.quality.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={qualityColorMapping[entry.name]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                    {pieData.quality.length > 0 && (
+                        <div className="donut-center-label">
+                            <span className="donut-percentage">{pieData.quality[0].value.toFixed(0)}%</span>
+                        </div>
+                    )}
+                </div>
             </div>
         )}
         <div className="table-container">

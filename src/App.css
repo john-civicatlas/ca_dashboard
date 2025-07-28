@@ -80,9 +80,32 @@ main {
 .chart-container, .table-container {
   margin-bottom: 40px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border-radius: 8px;
-  background: #ffffff; /* Use a slightly different white for cards */
+  background: #ffffff;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+
+.chart-container:hover, .table-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  border-color: #FF7C66;
+}
+
+.pie-chart-item {
+  transition: all 0.3s ease;
+  padding: 15px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.pie-chart-item:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  border-color: #3549B3;
 }
 
 h2 {
@@ -90,6 +113,60 @@ h2 {
   padding-bottom: 10px;
   margin-bottom: 20px;
   color: #181818; /* Off-Black */
+}
+
+/* Donut chart wrapper */
+.donut-chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Center label for donut charts */
+.donut-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.donut-percentage {
+  font-size: 28px;
+  font-weight: bold;
+  color: #181818;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.donut-label {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.2;
+}
+
+/* Adjust the pie chart container to ensure proper layering */
+.pie-chart-item .recharts-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure the chart container has proper dimensions */
+.pie-chart-item > div {
+  height: 250px;
+  margin: 0 auto;
+}
+
+/* Fix for the main quality distribution chart */
+.chart-container > .donut-chart-wrapper > div {
+  height: 300px;
 }
 
 table {
