@@ -16,7 +16,7 @@ body {
 .dashboard-header {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: right;
   background-color: #FAF9FB;
   color: #181818;
   padding: 20px;

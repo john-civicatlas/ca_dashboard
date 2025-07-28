@@ -150,7 +150,7 @@ function Dashboard() {
                 ].filter(item => item.value > 0);
 
                 const completenessMetrics = [
-                    'Descriptions', 'Locations', 'Contacts', 'Links to Extra Documents', 'Minutes Posted'
+                    'Descriptions', 'Locations', 'Contacts', 'Links to Extra Documents'
                 ];
 
                 const completenessCharts = completenessMetrics.map(metric => {
