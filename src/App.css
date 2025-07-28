@@ -10,26 +10,28 @@ body {
 .dashboard-container {
   font-family: Lato, sans-serif;
   padding: 20px;
+  align-items: left;
 }
 
 .dashboard-header {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
   background-color: #FAF9FB;
   color: #181818;
   padding: 20px;
-  text-align: center;
+  text-align: left;
 }
 
 .header-logo {
-  max-width: 300px;
+  max-width: 60px;
   margin-bottom: 10px;
 }
 
 .dashboard-header h2 {
   margin: 0;
-  font-size: 1.5em;
+  font-size: 1.3em;
+  align: left;
   color: #424242; /* Dark-Gray */
 }
 
@@ -108,10 +110,11 @@ main {
 }
 
 h2 {
-  border-bottom: 2px solid #FF5950; /* Primary Branding */
+  border-bottom: 2px solid #C4C4C4; /* Primary Branding */
+  font-size: 1.3em;
   padding-bottom: 10px;
   margin-bottom: 20px;
-  color: #181818; /* Off-Black */
+  color: #424242; /* Light - Gray*/
 }
 
 table {

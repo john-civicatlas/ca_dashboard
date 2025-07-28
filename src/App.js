@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import './App.css';
+
+// Fix for default markers in react-leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
 
 const COLORS = ['#FF5950', '#0F2490', '#FF7C66', '#3549B3', '#424242', '#181818'];
 const qualityColorMapping = {
@@ -104,8 +115,8 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <img src="/logo.png" alt="Civic Atlas Logo" className="header-logo" />
-        <h2>North Texas Zoning Case Dashboard</h2>
+        <img src="/logo_2.png" alt="Civic Atlas Logo" className="header-logo" />
+        <h2>Civic Atlas Data Coverage Dashboard</h2>
       </header>
       <main>
         {topNumbersData && (
@@ -124,6 +135,36 @@ function Dashboard() {
             </div>
           </div>
         )}
+        <div className="chart-container">
+          <h2>Coverage Area</h2>
+          <div style={{ height: '400px', width: '100%' }}>
+            <MapContainer 
+              center={[32.7767, -96.7970]} 
+              zoom={10} 
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[32.7767, -96.7970]}>
+                <Popup>
+                  Dallas, TX - Coverage Area
+                </Popup>
+              </Marker>
+              <Marker position={[32.7555, -97.3308]}>
+                <Popup>
+                  Fort Worth, TX - Coverage Area
+                </Popup>
+              </Marker>
+              <Marker position={[33.2148, -97.1331]}>
+                <Popup>
+                  Denton, TX - Coverage Area
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        </div>
         {pieData && (
           <>
             <h2>Data Completeness</h2>
