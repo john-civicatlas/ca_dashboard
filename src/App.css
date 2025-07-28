@@ -169,23 +169,91 @@ h2 {
   height: 300px;
 }
 
+/* Table Styles */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9em;
+  min-width: 800px;
 }
 
 th, td {
-  border: 1px solid #e0e0e0; /* Lighter gray for borders */
-  padding: 12px;
+  padding: 14px 16px;
   text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
 }
 
-thead {
-  background-color: #424242; /* Dark-Gray */
-  color: white;
+th {
+  background-color: #f8f9fa;
+  color: #555;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+tbody tr {
+  transition: all 0.2s ease;
+}
+
+tbody tr:not(:last-child) {
+  border-bottom: 1px solid #f5f5f5;
 }
 
 tbody tr:hover {
-  background-color: #FF7C66; /* Primary Branding Lighter */
-  color: white;
+  background-color: #f8f9ff;
+}
+
+/* Add subtle alternating row colors */
+tbody tr:nth-child(even) {
+  background-color: #fcfcfc;
+}
+
+tbody tr:nth-child(even):hover {
+  background-color: #f8f9ff;
+}
+
+/* Style the first and last cells for better readability */
+td:first-child, th:first-child {
+  padding-left: 24px;
+}
+
+td:last-child, th:last-child {
+  padding-right: 24px;
+}
+
+/* Responsive table container */
+@media (max-width: 768px) {
+  .table-container {
+    border-radius: 0;
+    margin: 20px -20px;
+    width: calc(100% + 40px);
+  }
+  
+  th, td {
+    padding: 12px 8px;
+  }
+  
+  td:first-child, th:first-child {
+    padding-left: 16px;
+  }
+  
+  td:last-child, th:last-child {
+    padding-right: 16px;
+  }
 }
