@@ -11,6 +11,8 @@ body {
   font-family: Lato, sans-serif;
   padding: 20px;
   align-items: left;
+  max-width: 1240px;
+  margin: 0 auto;
 }
 
 .dashboard-header {
@@ -55,11 +57,7 @@ main {
   transition: all 0.3s ease;
 }
 
-.callout-box:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  background-color: #f8f9fa;
-  transform: translateY(-2px);
-}
+
 
 .callout-box h3 {
   margin-top: 0;
@@ -90,9 +88,7 @@ main {
     transition: all 0.3s ease;
 }
 
-.pie-chart-item:hover {
-    transform: translateY(-2px);
-}
+
 
 .chart-container, .table-container {
   margin-bottom: 40px;
@@ -103,11 +99,7 @@ main {
   transition: all 0.3s ease;
 }
 
-.chart-container:hover, .table-container:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  background-color: #f8f9fa;
-  transform: translateY(-2px);
-}
+
 
 h2 {
   border-bottom: 2px solid #C4C4C4; /* Primary Branding */
@@ -119,12 +111,14 @@ h2 {
 
 table {
   width: 100%;
+  max-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  table-layout: fixed;
 }
 
 th, td {
@@ -133,6 +127,7 @@ th, td {
   border-bottom: 1px solid #f0f0f0;
   font-size: 14px;
   line-height: 1.4;
+  white-space: normal;
 }
 
 th {

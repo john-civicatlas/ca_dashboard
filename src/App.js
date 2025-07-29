@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { Map, Source, Layer, Popup } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import './App.css';
-
-// Fix for default markers in react-leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
 
 const COLORS = ['#FF5950', '#0F2490', '#FF7C66', '#3549B3', '#424242', '#181818'];
 const qualityColorMapping = {
@@ -53,19 +44,13 @@ const renderCompletenessLabel = ({ data }) => {
     );
 };
 
-const geoJsonStyle = (feature) => {
-    return {
-        fillColor: '#FF5950',
-        weight: 3,
-        opacity: 1,
-        color: '#0F2490',
-        fillOpacity: 0.5
-    };
-};
-
-const onEachFeature = (feature, layer) => {
-    if (feature.properties && feature.properties.CITY_NM) {
-        layer.bindPopup(`<b>${feature.properties.CITY_NM}</b><br/>Population 2022: ${feature.properties.POP2022 || 'N/A'}`);
+const geoJsonLayer = {
+    id: 'coverage-areas',
+    type: 'fill',
+    paint: {
+        'fill-color': '#FF5950',
+        'fill-opacity': 0.5,
+        'fill-outline-color': '#FF5950'
     }
 };
 
@@ -74,20 +59,37 @@ const calculateBounds = (features) => {
     
     let minLat = Infinity, maxLat = -Infinity;
     let minLng = Infinity, maxLng = -Infinity;
+    let hasValidCoords = false;
     
     features.forEach(feature => {
         if (feature.geometry && feature.geometry.coordinates) {
             feature.geometry.coordinates.forEach(ring => {
                 ring.forEach(coord => {
                     const [lng, lat] = coord;
-                    minLat = Math.min(minLat, lat);
-                    maxLat = Math.max(maxLat, lat);
-                    minLng = Math.min(minLng, lng);
-                    maxLng = Math.max(maxLng, lng);
+                    if (typeof lng === 'number' && typeof lat === 'number' && 
+                        !isNaN(lng) && !isNaN(lat) && 
+                        lng >= -180 && lng <= 180 && 
+                        lat >= -90 && lat <= 90) {
+                        minLat = Math.min(minLat, lat);
+                        maxLat = Math.max(maxLat, lat);
+                        minLng = Math.min(minLng, lng);
+                        maxLng = Math.max(maxLng, lng);
+                        hasValidCoords = true;
+                    }
                 });
             });
         }
     });
+    
+    // If no valid coordinates found, return default values
+    if (!hasValidCoords || minLat === Infinity || maxLat === -Infinity || 
+        minLng === Infinity || maxLng === -Infinity) {
+        return {
+            longitude: -96.7970,
+            latitude: 32.9750,
+            zoom: 9
+        };
+    }
     
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
@@ -108,7 +110,8 @@ const calculateBounds = (features) => {
     else zoom = 14;
     
     return {
-        center: [centerLat, centerLng],
+        longitude: centerLng,
+        latitude: centerLat,
         zoom: zoom
     };
 };
@@ -118,7 +121,8 @@ function Dashboard() {
   const [pieData, setPieData] = useState(null);
   const [topNumbersData, setTopNumbersData] = useState(null);
   const [geoJsonData, setGeoJsonData] = useState(null);
-  const [mapView, setMapView] = useState({ center: [32.9750, -96.7970], zoom: 9 });
+  const [mapView, setMapView] = useState({ longitude: -96.7970, latitude: 32.9750, zoom: 9 });
+  const [popupInfo, setPopupInfo] = useState(null);
 
   useEffect(() => {
     Papa.parse('/sample_data.csv', {
@@ -148,7 +152,6 @@ function Dashboard() {
         complete: (result) => {
             if(result.data.length > 0) {
                 const summaryData = result.data[0];
-                const totalCases = summaryData['Total Cases'];
 
                 const qualityData = [
                     { name: 'Very Good', value: summaryData['Very Good'] },
@@ -235,29 +238,45 @@ function Dashboard() {
         <div className="chart-container">
           <h2>Coverage Area</h2>
           <div style={{ height: '600px', width: '100%' }}>
-            <MapContainer 
-              center={mapView.center} 
-              zoom={mapView.zoom} 
+            <Map
+              longitude={mapView.longitude || -96.7970}
+              latitude={mapView.latitude || 32.9750}
+              zoom={mapView.zoom || 9}
               style={{ height: '100%', width: '100%' }}
+              mapStyle="mapbox://styles/civicatlas/cm37egw6p017a01qk91vf1o0g"
+              mapboxAccessToken="pk.eyJ1IjoiY2l2aWNhdGxhcyIsImEiOiJjbTM0cHU5bGIwMHd5MmtweTNpZmx6YWo4In0.gywn1wipwuBhia7ajjjcbg"
+              onMove={evt => setMapView(evt.viewState)}
+              onClick={event => {
+                const feature = event.features && event.features[0];
+                if (feature && feature.properties && feature.properties.CITY_NM) {
+                  setPopupInfo({
+                    longitude: event.lngLat.lng,
+                    latitude: event.lngLat.lat,
+                    city: feature.properties.CITY_NM,
+                    population: feature.properties.POP2022 || 'N/A'
+                  });
+                }
+              }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
               {geoJsonData && (
-                <GeoJSON 
-                  key="coverage-areas"
-                  data={geoJsonData} 
-                  style={geoJsonStyle}
-                  onEachFeature={onEachFeature}
-                />
+                <Source type="geojson" data={geoJsonData}>
+                  <Layer {...geoJsonLayer} />
+                </Source>
               )}
-              {!geoJsonData && (
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: 'white', padding: '10px', border: '1px solid #ccc' }}>
-                  Loading coverage areas...
-                </div>
+              {popupInfo && (
+                <Popup
+                  longitude={popupInfo.longitude}
+                  latitude={popupInfo.latitude}
+                  anchor="bottom"
+                  onClose={() => setPopupInfo(null)}
+                >
+                  <div>
+                    <b>{popupInfo.city}</b><br/>
+                    Population 2022: {popupInfo.population}
+                  </div>
+                </Popup>
               )}
-            </MapContainer>
+            </Map>
           </div>
         </div>
         {pieData && (
