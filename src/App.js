@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Papa from 'papaparse';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Map, Source, Layer, Popup } from 'react-map-gl/mapbox';
@@ -51,8 +51,13 @@ const geoJsonLayer = {
         'fill-color': '#FF5950',
         'fill-opacity': 0.5,
         'fill-outline-color': '#FF5950'
+    },
+    layout: {
+        visibility: 'visible'
     }
 };
+
+
 
 const calculateBounds = (features) => {
     if (!features || features.length === 0) return null;
@@ -123,6 +128,8 @@ function Dashboard() {
   const [geoJsonData, setGeoJsonData] = useState(null);
   const [mapView, setMapView] = useState({ longitude: -96.7970, latitude: 32.9750, zoom: 9 });
   const [popupInfo, setPopupInfo] = useState(null);
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     Papa.parse('/sample_data.csv', {
@@ -189,6 +196,8 @@ function Dashboard() {
       .then(response => response.json())
       .then(data => {
         console.log('GeoJSON data loaded:', data);
+        console.log('Sample feature properties:', data.features[0]?.properties);
+        
         // Filter to only show cities with last_edited value
         const filteredData = {
           ...data,
@@ -197,11 +206,11 @@ function Dashboard() {
           )
         };
         console.log('Filtered GeoJSON data:', filteredData);
+        console.log('Filtered features count:', filteredData.features.length);
         
         // Calculate bounds for the filtered features
         const mapView = calculateBounds(filteredData.features);
         console.log('Calculated map view:', mapView);
-        console.log('Filtered features count:', filteredData.features.length);
         if (mapView) {
             setMapView(mapView);
         }
@@ -237,8 +246,18 @@ function Dashboard() {
         )}
         <div className="chart-container">
           <h2>Coverage Area</h2>
-          <div style={{ height: '600px', width: '100%' }}>
+          <div 
+            ref={mapContainerRef}
+            style={{ height: '600px', width: '100%', position: 'relative' }}
+            onClick={(e) => {
+              // If clicking on the container but not on the map, clear popup
+              if (e.target === mapContainerRef.current) {
+                setPopupInfo(null);
+              }
+            }}
+          >
             <Map
+              ref={mapRef}
               longitude={mapView.longitude || -96.7970}
               latitude={mapView.latitude || 32.9750}
               zoom={mapView.zoom || 9}
@@ -246,15 +265,36 @@ function Dashboard() {
               mapStyle="mapbox://styles/civicatlas/cm37egw6p017a01qk91vf1o0g"
               mapboxAccessToken="pk.eyJ1IjoiY2l2aWNhdGxhcyIsImEiOiJjbTM0cHU5bGIwMHd5MmtweTNpZmx6YWo4In0.gywn1wipwuBhia7ajjjcbg"
               onMove={evt => setMapView(evt.viewState)}
+              cursor="pointer"
               onClick={event => {
-                const feature = event.features && event.features[0];
-                if (feature && feature.properties && feature.properties.CITY_NM) {
-                  setPopupInfo({
-                    longitude: event.lngLat.lng,
-                    latitude: event.lngLat.lat,
-                    city: feature.properties.CITY_NM,
-                    population: feature.properties.POP2022 || 'N/A'
+                console.log('Click event:', event);
+                console.log('Point:', event.point);
+                console.log('LngLat:', event.lngLat);
+                console.log('Current popupInfo:', popupInfo);
+                
+                if (mapRef.current) {
+                  // Try to get features at the clicked point
+                  const features = mapRef.current.queryRenderedFeatures(event.point, {
+                    layers: ['coverage-areas']
                   });
+                  console.log('Query rendered features:', features);
+                  
+                  const feature = features && features[0];
+                  console.log('Feature:', feature);
+                  if (feature && feature.properties) {
+                    console.log('Feature properties:', feature.properties);
+                    // Show popup with city details
+                    setPopupInfo({
+                      longitude: event.lngLat.lng,
+                      latitude: event.lngLat.lat,
+                      city: feature.properties.CITY_NM || 'Unknown City',
+                      population: feature.properties.POP2022 || 'N/A'
+                    });
+                  } else {
+                    console.log('No feature or properties found');
+                    // Clear popup when clicking outside features
+                    setPopupInfo(null);
+                  }
                 }
               }}
             >
@@ -263,12 +303,20 @@ function Dashboard() {
                   <Layer {...geoJsonLayer} />
                 </Source>
               )}
-              {popupInfo && (
+              {!geoJsonData && (
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000, background: 'white', padding: '10px', border: '1px solid #ccc' }}>
+                  Loading coverage areas...
+                </div>
+              )}
+
+                          {popupInfo && (
                 <Popup
                   longitude={popupInfo.longitude}
                   latitude={popupInfo.latitude}
                   anchor="bottom"
                   onClose={() => setPopupInfo(null)}
+                  closeButton={true}
+                  closeOnClick={false}
                 >
                   <div>
                     <b>{popupInfo.city}</b><br/>
