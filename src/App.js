@@ -391,20 +391,30 @@ function Dashboard() {
         )}
         <div className="table-container">
           <h2>Zoning Case Data</h2>
-          <table>
-            <thead>
-              <tr>
-                {tableData.length > 0 && tableData[0] && Object.keys(tableData[0]).map((key) => <th key={key}>{key}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((row, index) => (
-                <tr key={index}>
-                  {row && Object.values(row).map((value, i) => <td key={i}>{String(value)}</td>)}
+          <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+            <table style={{ minWidth: 'max-content', tableLayout: 'auto' }}>
+              <thead>
+                <tr>
+                  {tableData.length > 0 && tableData[0] && Object.keys(tableData[0])
+                    .filter(key => !['Has Applicant (no case)', 'Has Owner (no case)', 'Has Other Role'].includes(key))
+                    .map((key) => (
+                      <th key={key} style={{ whiteSpace: 'normal', wordWrap: 'break', maxWidth: '60px' }}>
+                        {key}
+                      </th>
+                    ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {tableData.map((row, index) => (
+                  <tr key={index}>
+                    {row && Object.entries(row)
+                      .filter(([key]) => !['Has Applicant (no case)', 'Has Owner (no case)', 'Has Other Role'].includes(key))
+                      .map(([key, value], i) => <td key={i}>{String(value)}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>
