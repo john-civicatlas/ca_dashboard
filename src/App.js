@@ -161,11 +161,11 @@ function Dashboard() {
                 const summaryData = result.data[0];
 
                 const qualityData = [
-                    { name: 'Very Good', value: summaryData['Very Good'] },
-                    { name: 'Good', value: summaryData['Good'] },
-                    { name: 'Normal', value: summaryData['Normal'] },
-                    { name: 'Poor', value: summaryData['Poor'] },
-                ].filter(item => item.value > 0);
+                    { name: 'Very Good', value: summaryData['Very Good'] || 0 },
+                    { name: 'Good', value: summaryData['Good'] || 0 },
+                    { name: 'Normal', value: summaryData['Normal'] || 0 },
+                    { name: 'Poor', value: summaryData['Poor'] || 0 },
+                ];
 
                 const completenessMetrics = [
                     'Descriptions', 'Locations', 'Contacts', 'Links to Extra Documents'
@@ -370,10 +370,23 @@ function Dashboard() {
                     <Pie data={pieData.quality} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={40} fill="#8884d8" label={renderCustomizedLabel} labelLine={false}>
                         {pieData.quality.map((entry, index) => <Cell key={`cell-${index}`} fill={qualityColorMapping[entry.name]} />)}
                     </Pie>
-                    <Tooltip />
-                    <Legend />
                     </PieChart>
                 </ResponsiveContainer>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px' }}>
+                    {['Very Good', 'Good', 'Normal', 'Poor'].map((name, index) => (
+                        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div 
+                                style={{ 
+                                    width: '12px', 
+                                    height: '12px', 
+                                    backgroundColor: qualityColorMapping[name],
+                                    borderRadius: '2px'
+                                }} 
+                            />
+                            <span>{name}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
         )}
         <div className="table-container">
